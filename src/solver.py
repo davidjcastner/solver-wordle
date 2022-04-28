@@ -1,10 +1,8 @@
 import time
 
-from game_result import GameResult
 from interface import Interface
-from restriction import Restriction
 from strategy import Strategy
-from tracker import Tracker
+from wordle import Wordle
 
 
 def wait_ms(ms: int) -> None:
@@ -16,37 +14,44 @@ class Solver:
 
     def __init__(
         self,
-        valid_words: list[str],
-        word_length: int,
+        wordle: Wordle,
         interface: Interface,
-        strategy: Strategy,
-        tracker: Tracker
+        strategy: Strategy
     ) -> None:
-        self.valid_words = valid_words
-        self.word_length = word_length
+        self.wordle = wordle
         self.interface = interface
         self.strategy = strategy
-        self.tracker = tracker
 
-    def solve(self, guess_delay_ms: int = 0) -> GameResult:
+    def solve(self, guess_delay_ms: int = 0) -> int:
         '''solves the wordle'''
         # setup a new game
-        self.interface.new_game()
-        restriction = Restriction(self.valid_words, self.word_length)
+        self.wordle.new_game()
+        self.interface.new_game(
+            valid_words=self.wordle.get_valid_words(),
+            max_guesses=self.wordle.get_max_guesses()
+        )
         # start making guesses
-        while not self.interface.is_game_over():
-            guess = self.strategy.best_guess(restriction, self.interface.previous_guesses())
+        while not self.wordle.is_game_over():
+            guess = self.strategy.best_guess(
+                valid_words=self.wordle.get_valid_words(),
+                remaining_words=self.wordle.get_remaining_words(),
+                word_length=self.wordle.get_word_length(),
+                remaining_guesses=self.wordle.get_remaining_guesses()
+            )
             guess_result = self.interface.make_guess(guess)
-            restriction.update(guess_result)
+            self.wordle.add_guess(guess, guess_result)
             wait_ms(guess_delay_ms)
-        # return the result
-        return self.interface.get_result()
+        # return the game result
+        actual_word = self.interface.get_actual_word()
+        self.wordle.set_actual_word(actual_word)
+        game_result = self.wordle.get_result()
+        self.interface.wrap_up(game_result)
+        return game_result
 
     def run(self, guess_delay_ms: int = 0, game_delay_ms: int = 0, max_solves: int = 100) -> None:
         '''continuously solves wordles while tracking the results'''
         solve_count = 0
         while solve_count < max_solves:
-            result = self.solve(guess_delay_ms=guess_delay_ms)
-            self.tracker.add_result(result)
+            self.solve(guess_delay_ms=guess_delay_ms)
             solve_count += 1
             wait_ms(game_delay_ms)

@@ -1,28 +1,21 @@
 from abc import ABC, abstractmethod
 
-from game_result import GameResult
-from guess_result import GuessResult
-
 
 class Interface(ABC):
-    '''abstract base class for interacting with a wordle game implementation'''
+    '''interface for interacting with the user or application'''
 
     @abstractmethod
-    def new_game(self) -> None:
+    def new_game(self, valid_words: set[set], max_guesses: int) -> None:
         '''performs any necessary setup for a new game'''
 
     @abstractmethod
-    def is_game_over(self) -> bool:
-        '''returns True if the game is over'''
-
-    @abstractmethod
-    def previous_guesses(self) -> list[str]:
-        '''returns the previous guesses'''
-
-    @abstractmethod
-    def make_guess(self, guess: str) -> GuessResult:
+    def make_guess(self, guess: str) -> list[int]:
         '''makes a guess and returns the result'''
 
     @abstractmethod
-    def get_result(self) -> GameResult:
-        '''returns the result of the game'''
+    def get_actual_word(self) -> str:
+        '''returns the actual word that the game is or was trying to guess'''
+
+    @abstractmethod
+    def wrap_up(self, game_result: int) -> None:
+        '''performs any necessary cleanup for the game'''

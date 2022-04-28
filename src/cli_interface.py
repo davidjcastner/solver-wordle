@@ -3,106 +3,87 @@ import random
 from game_result import GameResult
 from guess_result import GuessResult
 from interface import Interface
-from letter_result import LetterResult
+from utility import calculate_result
 
 RESULT_CHAR_LOOKUP = {
     LetterResult.INCORRECT: 'X',
-    LetterResult.WRONG_POSITION: 'W',
-    LetterResult.CORRECT: 'Y',
+    GuessResult.MATCH: 'Y',
 }
 
 
 class CLIInterface(Interface):
     '''cli interface for wordle game'''
 
-    def __init__(self, valid_words: list[str], max_guesses: int = 6) -> None:
-        self.valid_words = valid_words.copy()
-        self.max_guesses = max_guesses
-        self.current_word = None
-        self.guesses = []
-        self.guess_results = []
-        self.solved = False
+    def display_new_game(self) -> None:
+        '''displays the new game message'''
+        print('Starting a new game of Wordle...')
+
+    def check_for_hide_word(self) -> bool:
+        '''asks the user if the word should be hidden'''
+        while True:
+            answer = input('Should the word be hidden? (y/n) ')
+            if answer.lower() == 'y':
+                return True
+            elif answer.lower() == 'n':
+                return False
+            else:
+                print('Invalid answer. Try again.')
 
     def line_guess(self, line: int) -> str:
         '''returns the guess for the given line'''
-        return self.guesses[line] if line < len(self.guesses) else '_' * len(self.current_word)
+        return self.guesses[line] if line < len(self.guesses) else '_' * len(self.actual_word)
 
     def line_result(self, line: int) -> str:
         '''returns the result of the given line'''
         if not line < len(self.guess_results):
-            return ' ' * len(self.current_word)
+            return ' ' * len(self.actual_word)
         result = self.guess_results[line]
-        result_chars = [RESULT_CHAR_LOOKUP[lr] for lr in result.letter_results]
+        result_chars = [RESULT_CHAR_LOOKUP[res] for res in result]
         return ''.join(result_chars)
 
-    def display_game(self) -> None:
+    def display_game_state(self) -> None:
         '''displays the current game state'''
-        word_length = len(self.current_word)
-        print('=' * (word_length * 4 + 6))
+        display = ''
+        word_length = len(self.actual_word)
+        display += '=' * (word_length * 4 + 6) + '\n'
+        if not self.hide_word:
+            display += 'Word: ' + self.actual_word + '\n'
+            display += '=' * (word_length * 4 + 6) + '\n'
         for index in range(self.max_guesses):
             line_guess = self.line_guess(index)
             line_result = self.line_result(index)
-            line = str(index) + ': ' + ' '.join(line_guess) + ' | ' + ' '.join(line_result)
-            print(line)
+            line = str(index + 1) + ': ' + ' '.join(line_guess) + ' | ' + ' '.join(line_result)
+            display += line + '\n'
+        print(display[:-1])
 
-    def new_game(self) -> None:
+    def new_game(self, valid_words: set[set], max_guesses: int) -> None:
         '''performs any necessary setup for a new game'''
-        self.current_word = random.choice(self.valid_words)
+        self.actual_word = random.choice(list(valid_words))
+        self.max_guesses = max_guesses
         self.guesses = []
         self.guess_results = []
-        self.solved = False
-        print(f'New game started with word {self.current_word}')
-        self.display_game()
+        self.display_new_game()
+        self.hide_word = self.check_for_hide_word()
+        self.display_game_state()
 
-    def can_make_guess(self) -> bool:
-        '''returns True if the game can make a guess'''
-        return len(self.guesses) < self.max_guesses
-
-    def is_game_over(self) -> bool:
-        '''returns True if the game is over'''
-        return self.solved or not self.can_make_guess()
-
-    def previous_guesses(self) -> list[str]:
-        '''returns the previous guesses'''
-        return self.guesses.copy()
-
-    def check_guess(self, guess: str) -> GuessResult:
-        '''checks the guess and returns the result'''
-        result = GuessResult(guess)
-        # start with checking for correct letters
-        unsolved_indexes = []
-        for index, letter in enumerate(guess):
-            if letter == self.current_word[index]:
-                result.update(index, LetterResult.CORRECT)
-            else:
-                unsolved_indexes.append(index)
-        # get the letter frequency skipping over correct letters
-        letter_count = {}
-        for index, letter in enumerate(self.current_word):
-            if index not in unsolved_indexes:
-                continue
-            letter_count[letter] = letter_count.get(letter, 0) + 1
-        # loop through remaining letters and check for matches
-        for index, letter in enumerate(guess):
-            if index not in unsolved_indexes:
-                continue
-            if letter in letter_count and letter_count[letter] > 0:
-                result.update(index, LetterResult.WRONG_POSITION)
-                letter_count[letter] -= 1
-        # return the result
-        return result
-
-    def make_guess(self, guess: str) -> GuessResult:
+    def make_guess(self, guess: str) -> list[int]:
         '''makes a guess and returns the result'''
-        assert self.can_make_guess(), 'Cannot make guess'
+        result = calculate_result(guess, self.actual_word)
         self.guesses.append(guess)
-        result = self.check_guess(guess)
         self.guess_results.append(result)
-        if guess == self.current_word:
-            self.solved = True
-        self.display_game()
+        self.display_game_state()
         return result
 
-    def get_result(self) -> GameResult:
-        '''returns the result of the game'''
-        return GameResult(self.current_word, self.guesses)
+    def get_actual_word(self) -> str:
+        '''returns the actual word that the game is or was trying to guess'''
+        return self.actual_word
+
+    def wrap_up(self, game_result: int) -> None:
+        '''performs any necessary cleanup for the game'''
+        if game_result == GameResult.WIN:
+            if len(self.guesses) <= 1:
+                print('Lucky guess, you won on the first try!')
+            else:
+                print(f'Congrats, you won in {len(self.guesses)} guesses!')
+        elif game_result == GameResult.LOSE:
+            print('Oh no, you lost. Better luck next time!')

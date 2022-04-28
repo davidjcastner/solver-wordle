@@ -1,32 +1,35 @@
-# from cli_interface import CLIInterface
-from letter_frequency_strategy import LetterFrequencyStrategy
+from interface import Interface
+from restriction import Restriction
 from solver import Solver
-from tracker import Tracker
-from user_input_interface import UserInputInterface
-from word_list import WordList
+from strategy import Strategy
+from word_set import WordSet
+from wordle import Wordle
 
-WORD_FILE = './data/valid_words.txt'
+# implementations to use
+from restriction_logic import RestrictionLogic as RestrictionImplementation
+from wordle_logic import WordleLogic as WordleImplementation
+from web_app_interface import WebAppInterface as InterfaceImplementation
+from letter_frequency_strategy import LetterFrequencyStrategy as StrategyImplementation
+
+
+WORD_FILE = './data/valid_words_web.txt'
 WORD_LENGTH = 5
-TRACKER_FILE = './data/tracker.json'
+MAX_GUESSES = 6
 
 
 def main() -> None:
     '''main function'''
-    valid_words = WordList(WORD_FILE, WORD_LENGTH).to_list()
-    strategy = LetterFrequencyStrategy()
-    interface = UserInputInterface(valid_words=valid_words)
-    tracker = Tracker(
-        results_file=TRACKER_FILE,
-        strategy_name=strategy.get_strategy_name()
-    )
+    valid_words = WordSet(WORD_FILE, WORD_LENGTH).to_set()
+    restriction: Restriction = RestrictionImplementation(valid_words)
+    wordle: Wordle = WordleImplementation(valid_words, MAX_GUESSES, restriction)
+    interface: Interface = InterfaceImplementation()
+    strategy: Strategy = StrategyImplementation()
     solver = Solver(
-        valid_words=valid_words,
-        word_length=WORD_LENGTH,
+        wordle=wordle,
         interface=interface,
-        strategy=strategy,
-        tracker=tracker
+        strategy=strategy
     )
-    solver.run(guess_delay_ms=1000, game_delay_ms=3000, max_solves=10)
+    solver.run(guess_delay_ms=1000, game_delay_ms=0, max_solves=10)
 
 
 if __name__ == '__main__':
