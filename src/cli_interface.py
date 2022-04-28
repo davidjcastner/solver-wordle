@@ -6,7 +6,8 @@ from interface import Interface
 from utility import calculate_result
 
 RESULT_CHAR_LOOKUP = {
-    LetterResult.INCORRECT: 'X',
+    GuessResult.WRONG: 'X',
+    GuessResult.CLOSE: 'W',
     GuessResult.MATCH: 'Y',
 }
 
