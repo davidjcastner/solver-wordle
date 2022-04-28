@@ -604,7 +604,6 @@ assot
 aster
 astir
 astun
-asura
 asway
 aswim
 asyla
@@ -1163,7 +1162,6 @@ bleak
 blear
 bleat
 blebs
-blech
 bleed
 bleep
 blees
@@ -2544,7 +2542,6 @@ cutto
 cutty
 cutup
 cuvee
-cuzes
 cwtch
 cyano
 cyans
@@ -7983,7 +7980,6 @@ parks
 parky
 parle
 parly
-parma
 parol
 parps
 parra

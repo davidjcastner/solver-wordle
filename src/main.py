@@ -9,7 +9,7 @@ from wordle import Wordle
 from restriction_logic import RestrictionLogic as RestrictionImplementation
 from wordle_logic import WordleLogic as WordleImplementation
 from web_app_interface import WebAppInterface as InterfaceImplementation
-from letter_frequency_strategy import LetterFrequencyStrategy as StrategyImplementation
+from random_guess_strategy import RandomGuessStrategy as StrategyImplementation
 
 
 WORD_FILE = './data/valid_words_web.txt'
@@ -29,7 +29,7 @@ def main() -> None:
         interface=interface,
         strategy=strategy
     )
-    solver.run(guess_delay_ms=1000, game_delay_ms=0, max_solves=10)
+    solver.run(guess_delay_ms=0, game_delay_ms=0, max_solves=20)
 
 
 if __name__ == '__main__':
