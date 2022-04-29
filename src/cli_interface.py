@@ -21,14 +21,15 @@ class CLIInterface(Interface):
 
     def check_for_hide_word(self) -> bool:
         '''asks the user if the word should be hidden'''
-        while True:
-            answer = input('Should the word be hidden? (y/n) ')
-            if answer.lower() == 'y':
-                return True
-            elif answer.lower() == 'n':
-                return False
-            else:
-                print('Invalid answer. Try again.')
+        # while True:
+        #     answer = input('Should the word be hidden? (y/n) ')
+        #     if answer.lower() == 'y':
+        #         return True
+        #     elif answer.lower() == 'n':
+        #         return False
+        #     else:
+        #         print('Invalid answer. Try again.')
+        return False
 
     def line_guess(self, line: int) -> str:
         '''returns the guess for the given line'''

@@ -9,10 +9,10 @@ from wordle import Wordle
 from restriction_logic import RestrictionLogic as RestrictionImplementation
 from wordle_logic import WordleLogic as WordleImplementation
 from web_app_interface import WebAppInterface as InterfaceImplementation
-from random_guess_strategy import RandomGuessStrategy as StrategyImplementation
+from expected_information_strategy import ExpectedInformationStrategy as StrategyImplementation
 
 
-WORD_FILE = './data/valid_words_web.txt'
+WORD_FILE = './data/valid_words.txt'
 WORD_LENGTH = 5
 MAX_GUESSES = 6
 
