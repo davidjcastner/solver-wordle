@@ -1,10 +1,11 @@
-from src.abstracts.engine import Engine
+from src.logic.engine import Engine
+from src.interfaces.cli_interface import CliInterface
 from src.strategy_evaluator import strategy_evaluator
 
 
 def engine_factory() -> Engine:
     '''engine factory'''
-    return Engine()
+    return Engine(CliInterface(), set(), set())
 
 
 def main() -> None:

@@ -1,5 +1,5 @@
-from src.abstracts.engine import Engine
 from src.abstracts.strategy import Strategy
+from src.logic.engine import Engine
 
 
 def strategy_evaluator(
@@ -17,13 +17,12 @@ def strategy_evaluator(
         print(f'{strategy_name} ({is_deterministic})')
         total = 0.0
         for answer in engine.get_allowed_answers():
-            engine.new_game(answer)
             if is_deterministic:
-                total += engine.play_game(strategy)
+                total += engine.play_game(strategy, answer)
             else:
                 sub_total = 0
                 for _ in range(trials):
-                    sub_total += engine.play_game(strategy)
+                    sub_total += engine.play_game(strategy, answer)
                 total += sub_total / trials
         average_score = total / len(engine.get_allowed_answers())
         print(f'Average score: {average_score}')
